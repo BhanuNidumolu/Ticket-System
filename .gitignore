@@ -1,0 +1,6 @@
+@"
+.env
+.env.*
+!.env.example
+.git
+"@ | Out-File -Encoding utf8 .gitignore

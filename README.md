@@ -7,12 +7,12 @@ them on getting the *fundamentals* rock solid rather than bolting on extra
 features — so no admin roles, no ticket assignment, no comments. Just a
 clean, correct, secure API that does exactly what it says on the tin.
 
-
 **🖥️ Live Frontend :** https://legendary-croissant-76248b.netlify.app/
 
 
-
 **🔗 Live API:** https://ticket-system-ix75.onrender.com
+
+
 **🔗 Health check:** https://ticket-system-ix75.onrender.com/health
 **📦 Repo:** https://github.com/BhanuNidumolu/Ticket-System
 
@@ -356,6 +356,8 @@ ships with a real automated suite covering:
 - Ticket status transitions (every legal and illegal move in the matrix)
 - Ticket ownership and access control (cross-user access attempts)
 - Authentication requirements on every protected route
+- Registration and login validation (duplicate email, invalid email,
+  short password, wrong password, case-insensitive email matching)
 - Request validation (missing title, invalid status, etc.)
 - Full ticket lifecycle: create, list, get, and status updates
 
@@ -415,9 +417,23 @@ ok      ticket-system/internal/auth     (cached)
 === RUN   TestUpdateStatus_InvalidStatusValueRejected
 --- PASS: TestUpdateStatus_InvalidStatusValueRejected (0.03s)
 PASS
-ok      ticket-system/internal/ticket   0.154s
+ok      ticket-system/internal/ticket   0.281s
+=== RUN   TestRegister_Success
+--- PASS: TestRegister_Success (0.03s)
+=== RUN   TestRegister_DuplicateEmailRejected
+--- PASS: TestRegister_DuplicateEmailRejected (0.05s)
+=== RUN   TestRegister_InvalidEmailRejected
+--- PASS: TestRegister_InvalidEmailRejected (0.00s)
+=== RUN   TestRegister_ShortPasswordRejected
+--- PASS: TestRegister_ShortPasswordRejected (0.00s)
+=== RUN   TestLogin_WrongPasswordRejected
+--- PASS: TestLogin_WrongPasswordRejected (0.05s)
+=== RUN   TestLogin_UnknownEmailRejected
+--- PASS: TestLogin_UnknownEmailRejected (0.00s)
+=== RUN   TestLogin_EmailIsCaseInsensitive
+--- PASS: TestLogin_EmailIsCaseInsensitive (0.05s)
 PASS
-ok      ticket-system/internal/user
+ok      ticket-system/internal/user     0.206s
 ```
 
 ### Production Testing

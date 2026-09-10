@@ -436,6 +436,22 @@ PASS
 ok      ticket-system/internal/user     0.206s
 ```
 
+I also ran the full suite with Go's race detector to check for
+concurrency bugs, not just logical ones:
+
+```bash
+go test -race ./...
+```
+
+```text
+ok      ticket-system/internal/auth
+ok      ticket-system/internal/ticket
+ok      ticket-system/internal/user
+```
+
+No `WARNING: DATA RACE` output — clean. (See the Concurrency Safety note
+under Design Decisions for a bug this actually caught during development.)
+
 ### Production Testing
 
 I also verified the full flow against the **live deployed URL**, not just
@@ -520,6 +536,21 @@ Small detail, but it's the kind of detail that separates "it works" from
 Go's map iteration order is randomized on purpose. `GET /tickets` sorts
 newest-first explicitly rather than relying on map order, so two identical
 requests always return the same order.
+
+**Concurrency safety: returning copies, not shared pointers**
+The in-memory store's `FindByID` and `ListByUser` return **copies** of
+tickets, not pointers into the map. Early on, handlers like
+`UpdateStatus` mutated a fetched ticket's fields (`t.Status = newStatus`)
+before calling `Update()` — but that mutation happened *outside* the
+store's mutex, on a struct another goroutine's `ListByUser` could be
+reading at the same instant. That's a real data race, just one too fast
+and too rare to show up in a normal test run. Returning copies means
+every handler mutates its own private value, and the only thing that
+ever touches the map is `Update()`, always under the lock. Verified
+clean with `go test -race ./...` — run via
+`docker run --rm -v "${PWD}:/app" -w /app golang:1.23 go test -race ./...`
+since Windows needs a C toolchain for `-race` that I didn't have
+installed; Docker's full `golang` image already ships with one.
 
 ## 🏗️ Project Structure
 

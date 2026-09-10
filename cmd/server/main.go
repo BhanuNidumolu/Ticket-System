@@ -43,8 +43,9 @@ func main() {
 	mux.Handle("PATCH /tickets/{id}/status", requireAuth(http.HandlerFunc(ticketHandler.UpdateStatus)))
 
 	addr := ":" + port
+	frontendOrigin := getEnv("FRONTEND_ORIGIN", "*")
 	log.Printf("ticket-system listening on %s", addr)
-	if err := http.ListenAndServe(addr, logRequests(mux)); err != nil {
+	if err := http.ListenAndServe(addr, logRequests(httpx.CORS(frontendOrigin)(mux))); err != nil {
 		log.Fatalf("server failed: %v", err)
 	}
 }
